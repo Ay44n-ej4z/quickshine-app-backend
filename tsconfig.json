@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    "target": "es2021",
+    "lib": ["es2021"],
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "plugins": [
+      {
+        "transform": "typescript-transform-paths",
+        "afterDeclarations": true
+      }
+    ],
+    "sourceMap": false,
+    "outDir": "build",
+    "strict": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true
+  },
+  // "include": ["src/swagger-output.json", "src/**/*", "src/swagger.ts"],
+  // "exclude": ["node_modules", "src/swagger.ts"],
+  "types": ["node", "express"]
+}

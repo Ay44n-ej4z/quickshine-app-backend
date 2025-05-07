@@ -1,0 +1,181 @@
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(uuid())
+  name          String
+  email         String    @unique
+  passwordHash  String
+  phone         String
+  roleId        String
+  role          Role      @relation(fields: [roleId], references: [id])
+  createdAt     DateTime  @default(now())
+  vehicles      Vehicle[]
+  bookings      Booking[] @relation("CustomerBookings")
+  addresses     UserAddress[]
+  userPlans     UserPlan[]
+  assignments   BookingAssignment[] @relation("EmployeeAssignments")
+  feedbacks     Feedback[] @relation("CustomerFeedback")
+  notifications Notification[]
+}
+
+
+model Role {
+  id          String  @id @default(uuid())
+  name        String  @unique
+  description String
+  users       User[]
+}
+
+
+model Vehicle {
+  id           String  @id @default(uuid())
+  userId       String
+  user         User    @relation(fields: [userId], references: [id])
+  type         String
+  make         String
+  model        String
+  year         Int
+  licensePlate String
+  color        String
+  bookings     Booking[]
+}
+
+
+model Service {
+  id              String   @id @default(uuid())
+  name            String
+  description     String
+  price           Decimal @db.Decimal(10, 2)
+  durationMinutes Int
+  isActive        Boolean  @default(true)
+  bookings        Booking[]
+}
+
+
+model Booking {
+  id             String              @id @default(uuid())
+  customerId     String
+  vehicleId      String
+  serviceId      String
+  scheduledTime  DateTime
+  status         String
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  notes          String?
+  customer       User                @relation("CustomerBookings", fields: [customerId], references: [id])
+  vehicle        Vehicle             @relation(fields: [vehicleId], references: [id])
+  service        Service             @relation(fields: [serviceId], references: [id])
+  assignments    BookingAssignment[]
+  payment        Payment?
+  feedback       Feedback?
+  planBookings   PlanBooking[]
+}
+
+
+model BookingAssignment {
+  id         String   @id @default(uuid())
+  bookingId  String
+  employeeId String
+  assignedAt DateTime
+  status     String
+  booking    Booking  @relation(fields: [bookingId], references: [id])
+  employee   User     @relation("EmployeeAssignments", fields: [employeeId], references: [id])
+}
+
+
+model Payment {
+  id            String   @id @default(uuid())
+  bookingId     String   @unique
+  amount        Decimal
+  paymentMethod String
+  paymentStatus String
+  paidAt        DateTime
+  booking       Booking  @relation(fields: [bookingId], references: [id])
+}
+
+
+model UserAddress {
+  id           String   @id @default(uuid())
+  userId       String
+  addressLine1 String
+  addressLine2 String?
+  city         String
+  state        String
+  postalCode   String
+  country      String
+  isPrimary    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  user         User     @relation(fields: [userId], references: [id])
+}
+
+
+model Plan {
+  id              String     @id @default(uuid())
+  name            String
+  description     String
+  price           Decimal
+  durationMonths  Int
+  serviceType     String
+  isActive        Boolean    @default(true)
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  userPlans       UserPlan[]
+}
+
+
+model UserPlan {
+  id         String      @id @default(uuid())
+  userId     String
+  planId     String
+  startDate  DateTime
+  endDate    DateTime
+  status     String
+  createdAt  DateTime    @default(now())
+  user       User        @relation(fields: [userId], references: [id])
+  plan       Plan        @relation(fields: [planId], references: [id])
+  planBookings PlanBooking[]
+}
+
+
+model PlanBooking {
+  id          String   @id @default(uuid())
+  userPlanId  String
+  bookingId   String
+  scheduledFor DateTime
+  status      String
+  userPlan    UserPlan @relation(fields: [userPlanId], references: [id])
+  booking     Booking  @relation(fields: [bookingId], references: [id])
+}
+
+
+model Feedback {
+  id            String   @id @default(uuid())
+  bookingId     String   @unique
+  customerId    String
+  rating        Int
+  companyRating Int
+  comment       String?
+  createdAt     DateTime @default(now())
+  booking       Booking  @relation(fields: [bookingId], references: [id])
+  customer      User     @relation("CustomerFeedback", fields: [customerId], references: [id])
+}
+
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  message   String
+  type      String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}

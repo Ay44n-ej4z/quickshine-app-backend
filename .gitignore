@@ -1,0 +1,7 @@
+node_modules
+build
+sessions
+.env
+.DS_Store
+frontend/build/*
+.vscode/*
